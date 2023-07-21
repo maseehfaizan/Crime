@@ -1,0 +1,153 @@
+-----------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/maseehfaizan/Desktop/Econometrics/Econometrics_Project/Final Submitio
+> n/Faizan_Zhu.log
+  log type:  text
+ opened on:  17 Dec 2022, 20:39:17
+
+. 
+. use Faizan_Zhu.dta
+
+. /// Here, we are plotting the scatter plot with red points when the college is public
+> /// and red when the college is private to have a visual representation
+> 
+. scatter police crime
+
+. 
+. twoway  (scatter police crime if priv == 0, mcolor(red)) ///
+>                 (scatter police crime if priv == 1, mcolor(blue)) ///
+>                 , ytitle(Employed Officers) xtitle(Total Campus Crimes) ///
+>                 legend(label( 1 "Public college") label( 2 "Privat college" )) ///
+> 
+
+. /// Here, we are plotting the scatter plot with green points when the college is large
+> /// and red when the college is public to have a visual representation, the number 1600
+> 0
+> /// is vers close to the mean of number of enroll in our data set at 16076
+> 
+. twoway  (scatter police crime if enroll > 16000, mcolor(green)) ///
+>                 (scatter police crime if enroll < 16000, mcolor(black)) ///
+>                 , ytitle(Employed Officers) xtitle(Total Campus Crimes) ///
+>                 legend(label( 1 "Large Colleges") label( 2 "Small college")) ///
+> 
+
+. scatter 
+
+. 
+. 
+. /// Here we are generatin a new dummy variable = 1 when the # of enroll is large
+> /// and 0 when # of enroll is small we chose again 16000 because it is close to the mea
+> n
+> /// Since the Variables are already defined there is no need to run the code again.
+> gen hcoll = 1
+
+. replace hcoll = 0 if enroll < 16000
+(56 real changes made)
+
+. label variable hcoll "= 1 if total enrollment large"
+
+. 
+. /// for our table we are generating crime squared to check whether the regression is li
+> near
+> gen crime2 = crime*crime
+
+. label variable crime2  "crime squared"
+
+. 
+. gen crime3 = crime2*crime
+
+. label variable crime3  "crime cube"
+
+. 
+. 
+. 
+. gen enroll2 = enroll * enroll
+
+. label variable enroll2 "enroll squared"
+
+. 
+. 
+. 
+. 
+. /// Here we are quietly regressing our variable and storing them to be used on a table
+> qui reg police crime, r
+
+. estimates store e1
+
+. qui reg police crime i.priv, r
+
+. estimates store e2
+
+. qui reg police crime i.priv##i.hcoll , r
+
+. estimates store e3
+
+. qui reg police crime i.priv##i.hcoll lcrime crime2 ,r
+
+. estimates store e4
+
+. qui reg police crime enroll lenroll enroll2 i.priv##i.hcoll , r
+
+. estimates store e5
+
+. qui reg police crime lcrime enroll lenroll crime2 i.priv##i.hcoll enroll2, r
+
+. estimates store e6
+
+. 
+. etable, column(index) estimates(e1 e2 e3 e4 e5 e6) showstars showstarsnote /// 
+> title(Regression of Police officers employed)
+
+Regression of Police officers employed
+----------------------------------------------------------------------------------------------
+                                   1          2          3          4         5         6     
+----------------------------------------------------------------------------------------------
+total campus crimes             0.025 **   0.024 **   0.020 **   0.050 **    0.014    0.042 **
+                              (0.004)    (0.004)    (0.005)    (0.016)     (0.007)  (0.013)   
+=1 if private college                                                                         
+  1                                       -6.100 **  -4.915 *   -4.755      -3.803   -4.041   
+                                         (2.262)    (2.408)    (2.579)     (2.516)  (2.583)   
+= 1 if total enrollment large                                                                 
+  1                                                   4.451     -2.000      -4.384   -9.373   
+                                                    (3.302)    (4.398)     (5.134)  (6.105)   
+log(crime)                                                      -0.198               -0.071   
+                                                               (1.195)              (1.244)   
+crime squared                                                   -0.000               -0.000 * 
+                                                               (0.000)              (0.000)   
+total enrollment                                                             0.002    0.002   
+                                                                           (0.001)  (0.001)   
+log(enroll)                                                                 -6.767   -8.308   
+                                                                           (6.541)  (6.022)   
+enroll squared                                                              -0.000   -0.000   
+                                                                           (0.000)  (0.000)   
+Intercept                      10.817 **  11.956 **  11.152 **   8.683 *    58.352   69.122   
+                              (1.412)    (1.597)    (1.644)    (4.101)    (50.373) (46.113)   
+Number of observations             97         97         97         97          97       97   
+----------------------------------------------------------------------------------------------
+** p<.01, * p<.05
+
+. 
+. test crime2 lcrime
+
+ ( 1)  crime2 = 0
+ ( 2)  lcrime = 0
+
+       F(  2,    88) =    2.24
+            Prob > F =    0.1123
+
+. test enroll2 lenroll
+
+ ( 1)  enroll2 = 0
+ ( 2)  lenroll = 0
+
+       F(  2,    88) =    0.95
+            Prob > F =    0.3900
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Users/maseehfaizan/Desktop/Econometrics/Econometrics_Project/Final Submitio
+> n/Faizan_Zhu.log
+  log type:  text
+ closed on:  17 Dec 2022, 20:39:24
+-----------------------------------------------------------------------------------------
